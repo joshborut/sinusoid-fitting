@@ -1,4 +1,72 @@
+# Note: Portions of this code were generated with ChatGPT
+import numpy as np
+import jax
+import jax.numpy as jnp
+from jax import random
+from pdb import set_trace
+
 from dataset_generator import get_target, get_dataset, scatter_plot_xy, scatter_plot_two_datasets
+
+
+def get_average_dataset_deviation(predictions, labels):
+    return np.mean(np.abs(predictions - labels))
+
+
+def initialize_params(layer_sizes, key):
+    """
+    Initialize parameters for a fully connected neural network.
+
+    Parameters:
+    layer_sizes (list): List of integers specifying the size of each layer.
+    key (jax.random.PRNGKey): Random key for parameter initialization.
+
+    Returns:
+    params (list): List of tuples containing (weights, biases) for each layer.
+    """
+    params = []
+    keys = random.split(key, len(layer_sizes) - 1)
+
+    for in_size, out_size, k in zip(layer_sizes[:-1], layer_sizes[1:], keys):
+        weight_key, bias_key = random.split(k)
+        weights = random.normal(weight_key, (in_size, out_size)) * jnp.sqrt(2.0 / in_size)
+        biases = jnp.zeros(out_size)
+        params.append((weights, biases))
+
+    return params
+
+
+def forward_pass(params, x):
+    """
+    Perform a forward pass through the network.
+
+    Parameters:
+    params (list): Network parameters, a list of (weights, biases) tuples.
+    x (jax.numpy.array): Input data.
+
+    Returns:
+    jax.numpy.array: Output of the network.
+    """
+    for i, (weights, biases) in enumerate(params[:-1]):
+        x = jnp.dot(x, weights) + biases
+        x = jax.nn.relu(x)  # Apply ReLU activation for hidden layers
+
+    # Final layer (linear output)
+    final_weights, final_biases = params[-1]
+    output = jnp.dot(x, final_weights) + final_biases
+    return output
+
+
+def training_loop(params, train_examples, train_labels, test_examples, test_labels, epochs):
+    for epoch in range(epochs):
+        print(f"Epoch #{epoch+1}")
+        # TODO: Pass through training set
+
+        # Assess on test set
+        predicted_test_labels = forward_pass(params, jnp.reshape(jnp.array([test_examples]), (len(test_labels),1)))
+        print(get_average_dataset_deviation(jnp.squeeze(predicted_test_labels), test_labels))
+
+    # Graph test results
+    scatter_plot_two_datasets(test_examples, test_labels, test_examples, predicted_test_labels, "True", "Predicted", "NN Performance")
 
 if __name__ == '__main__':
     dataset_size = 1000
@@ -11,6 +79,12 @@ if __name__ == '__main__':
     test_examples = examples[training_set_size:]
     test_labels = labels[training_set_size:]
 
-    scatter_plot_two_datasets(train_examples, train_labels, test_examples, test_labels)
+    # Network setup
+    layer_sizes = [1, 40, 40, 1]  # Input layer (1), two hidden layers (40 each), output layer (1)
+    key = random.PRNGKey(0)
 
+    # Initialize parameters
+    params = initialize_params(layer_sizes, key)
+
+    training_loop(params, train_examples, train_labels, test_examples, test_labels, 1)
 

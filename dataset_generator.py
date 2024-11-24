@@ -23,13 +23,13 @@ def scatter_plot_xy(x, y):
     plt.show()
 
 
-def scatter_plot_two_datasets(x1, y1, x2, y2, label_1='Train', label_2='Test'):
+def scatter_plot_two_datasets(x1, y1, x2, y2, label_1='Train', label_2='Test', title='Scatter Plot of Two Datasets'):
     plt.scatter(x1, y1, color='b', marker='o', label=label_1)
     plt.scatter(x2, y2, color='r', marker='s', label=label_2)
 
     plt.xlabel('X Values')
     plt.ylabel('Y Values')
-    plt.title('Scatter Plot of Two Datasets')
+    plt.title(title)
     plt.legend()
     plt.grid(True)
     plt.show()
