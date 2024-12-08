@@ -2,18 +2,18 @@
 import numpy as np
 import jax
 import jax.numpy as jnp
-from jax import random as jrand
-import random as rand
-import random
-from pdb import set_trace
-from pdb import set_trace
+from jax import random as jrand, jit, grad
 
-from dataset_generator import get_target, get_dataset, scatter_plot_xy, scatter_plot_two_datasets
+from dataset_generator import get_dataset, scatter_plot_two_datasets
 
 
 def mean_squared_error(labels, predictions):
-    print(type(0.5 * jnp.mean((labels - predictions) ** 2)))
     return 0.5 * jnp.mean((labels - predictions) ** 2)
+
+
+def loss(params, examples, labels):
+    predictions = forward_pass(params, jnp.reshape(jnp.array([examples]), (len(labels), 1)))
+    return mean_squared_error(labels, predictions)
 
 
 def shuffle_dataset(examples, labels):
@@ -69,6 +69,29 @@ def forward_pass(params, x):
     return output
 
 
+@jit
+def update_params(params, x, y):
+    lr = 0.001
+    """
+    Perform one step of gradient descent to update parameters.
+
+    Parameters:
+    params (list): Network parameters.
+    x (jax.numpy.array): Input data.
+    y (jax.numpy.array): Ground truth target data.
+    lr (float): Learning rate.
+
+    Returns:
+    list: Updated network parameters.
+    """
+    grads = grad(loss)(params, x, y)  # Compute gradients of the loss w.r.t. parameters
+    updated_params = [
+        (w - lr * dw, b - lr * db)
+        for (w, b), (dw, db) in zip(params, grads)
+    ]
+    return updated_params
+
+
 def training_loop(params, train_examples, train_labels, test_examples, test_labels, epochs, minibatch_size=20):
     for epoch in range(epochs):
         train_examples, train_labels = shuffle_dataset(train_examples, train_labels)
@@ -77,9 +100,7 @@ def training_loop(params, train_examples, train_labels, test_examples, test_labe
             minibatch_examples = train_examples[
                                  starting_index: min(starting_index + minibatch_size, len(train_examples))]
             minibatch_labels = train_labels[starting_index: min(starting_index + minibatch_size, len(train_labels))]
-
-            minibatch_predictions = forward_pass(params, jnp.reshape(jnp.array([minibatch_examples]),
-                                                                     (len(minibatch_labels), 1)))
+            params = update_params(params, minibatch_examples, minibatch_labels)
 
         print(f"Epoch #{epoch + 1}")
 
@@ -93,7 +114,7 @@ def training_loop(params, train_examples, train_labels, test_examples, test_labe
 
 
 if __name__ == '__main__':
-    dataset_size = 1000
+    dataset_size = 10000
     examples, labels = get_dataset(3, 2, dataset_size)
 
     training_set_ratio = 0.8
@@ -109,5 +130,4 @@ if __name__ == '__main__':
 
     # Initialize parameters
     params = initialize_params(layer_sizes, key)
-
-    training_loop(params, train_examples, train_labels, test_examples, test_labels, 1)
+    training_loop(params, train_examples, train_labels, test_examples, test_labels, 5, 32)
