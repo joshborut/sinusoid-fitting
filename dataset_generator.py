@@ -18,9 +18,12 @@ def scatter_plot_xy(x, y):
     plt.scatter(x, y, color='b', marker='o')
     plt.xlabel('X Values')
     plt.ylabel('Y Values')
+    y_ticks = [i for i in range(5)]  # Customize these values as needed
+    plt.yticks(y_ticks)
     plt.title('Scatter Plot of X vs Y')
     plt.grid(True)
     plt.show()
+
 
 
 def scatter_plot_two_datasets(x1, y1, x2, y2, label_1='Train', label_2='Test', title='Scatter Plot of Two Datasets'):
