@@ -19,7 +19,7 @@ To install each dependency individually:
 
 ```
 pip install numpy
-pip stall torch torchvision
+pip install torch
 pip install matplotlib
 ```
 
