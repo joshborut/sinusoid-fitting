@@ -25,11 +25,21 @@ pip install matplotlib
 
 ## Running
 
-To run:
+To train the model and generate the figures in `/figs`:
 
 ```
 python train_nn.py
 ```
+
+## Performance
+
+![Before training](figs/Predictions_vs_labels_before_training.png)
+![Epoch #1](figs/Predictions_vs_labels_(Epoch_%231).png)
+![Epoch #2](figs/Predictions_vs_labels_(Epoch_%232).png)
+![Epoch #3](figs/Predictions_vs_labels_(Epoch_%233).png)
+![Epoch #4](figs/Predictions_vs_labels_(Epoch_%234).png)
+![Epoch #5](figs/Predictions_vs_labels_(Epoch_%235).png)
+
 
 ## License
 
