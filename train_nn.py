@@ -1,6 +1,7 @@
 # Note: Portions of this code were generated with ChatGPT
 import numpy as np
-from dataset_generator import get_train_and_test_data, scatter_plot_two_datasets, scatter_plot
+from dataset_generator import get_train_and_test_data, scatter_plot_two_datasets, scatter_plot, \
+    save_scatter_plot_two_datasets
 import torch
 from torch import nn
 import torch.optim as optim
@@ -69,6 +70,25 @@ def plot_predictions_and_labels(examples, labels, neural_net, title="Predictions
                               title=title)
 
 
+def save_predictions_and_labels(examples, labels, neural_net, title="Predictions vs examples"):
+    """Plot the neural net predictions for labels.
+
+    :param examples: List of examples
+    :param labels: List of labels
+    :param neural_net: Neural net object
+    :param title: Plot title
+    :return: None
+    """
+    with torch.no_grad():
+        predictions = neural_net(examples)
+        torch_labels = torch.from_numpy(labels).to(torch.float32).reshape(predictions.shape)
+        loss = torch.nn.functional.mse_loss(predictions, torch_labels)
+        print(f"Loss: {loss}")
+        print(get_average_dataset_deviation(predictions.numpy(), labels))
+    save_scatter_plot_two_datasets(examples, labels, examples, predictions, "Labels", "Predictions",
+                                   title=title)
+
+
 def training_loop(neural_net, train_examples, train_labels, test_examples, test_labels, epochs, minibatch_size=20):
     """Train the neural net.
 
@@ -82,6 +102,9 @@ def training_loop(neural_net, train_examples, train_labels, test_examples, test_
     :return: None
     """
     optimizer = optim.SGD(neural_net.parameters(), lr=0.001, momentum=0.9)
+
+    save_predictions_and_labels(test_examples, test_labels, neural_net,
+                                title=f"Predictions vs labels before training")
 
     for epoch_num in range(epochs):
         train_examples, train_labels = shuffle_dataset(train_examples, train_labels)
@@ -105,7 +128,7 @@ def training_loop(neural_net, train_examples, train_labels, test_examples, test_
 
         # Plot epoch outcome
         print(f"Epoch #{epoch_num + 1} loss: {loss.item()}")
-        plot_predictions_and_labels(test_examples, test_labels, neural_net,
+        save_predictions_and_labels(test_examples, test_labels, neural_net,
                                     title=f"Predictions vs labels (Epoch #{epoch_num + 1})")
 
     # Assess on test set
@@ -127,11 +150,9 @@ if __name__ == '__main__':
 
     # Initialize the neural net
     neural_net = NeuralNetwork([1, 40, 40, 1])  # Input layer (1), two hidden layers (40 each), output layer (1)
-    # output = neural_net(test_examples)
 
     # Network setup
     layer_sizes = [1, 40, 40, 1]  # Input layer (1), two hidden layers (40 each), output layer (1)
-    # key = jrand.PRNGKey(0)x
 
     # Train the neural net
     training_loop(neural_net, train_examples, train_labels, test_examples, test_labels, 5, 32)

@@ -74,6 +74,33 @@ def scatter_plot_two_datasets(x1, y1, x2, y2, label_1="Train", label_2="Test", x
     plt.show()
 
 
+def save_scatter_plot_two_datasets(x1, y1, x2, y2, label_1="Train", label_2="Test", x_title="X Value", y_title="Y Value", title='Scatter Plot of Two Datasets'):
+    """Plot two sets of ordered pairs.
+
+    :param x1: List of x values of dataset 1
+    :param y1: List of y values of dataset 1
+    :param x2: List of x values of dataset 2
+    :param y2: List of x values of dataset 2
+    :param label_1: Dataset 1 name
+    :param label_2: Dataset 2 name
+    :param x_title: X axis title
+    :param y_title: Y axis title
+    :param title: Plot title
+    :return: None
+    """
+
+    plt.scatter(x1, y1, color='b', marker='o', label=label_1)
+    plt.scatter(x2, y2, color='r', marker='s', label=label_2)
+
+    plt.xlabel(x_title)
+    plt.ylabel(y_title)
+    plt.title(title)
+    plt.legend()
+    plt.grid(True)
+    plt.savefig("figs/" + title.replace(" ", "_") + ".png", )
+    plt.clf()
+
+
 def get_train_and_test_data(dataset_size, training_set_ratio, amplitude, phase):
     """Randomly generate sinusoidal train and test datasets.
 
